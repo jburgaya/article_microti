@@ -2,13 +2,17 @@
 
 ---
 title: "TB_vole code"
+<<<<<<< HEAD
 author: "JBV"
+=======
+author: "JB"
+output: html_document
+>>>>>>> af2f2db237fa83c84de6da0e877c09a08dd1bc9a
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 
 ---
 Previous
