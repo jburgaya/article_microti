@@ -3,7 +3,6 @@
 ---
 title: "TB_vole code"
 author: "JBV"
-output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -27,7 +26,6 @@ library(viridis) # color viz
 library(plotly) # interactive viz
 library(heatmaply) # heatmap
 library(ggpubr) # stats in ggplot
-library(RColorBrewer)
 ```
 
 Load data
