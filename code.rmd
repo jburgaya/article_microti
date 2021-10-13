@@ -266,7 +266,7 @@ mat <- mat %>%
   mutate(TP = ifelse(mat$TP == 1, "Late infection", "Early infection"))
 mat
 
-# viz | ggheatmap() to obtain a static plot
+# viz | dynamic (ggheatmap() -> static)
 heatmaply(mat,
           ylab = "", xlab = "",
           main = "Pathology index",
