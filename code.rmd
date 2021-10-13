@@ -2,12 +2,7 @@
 
 ---
 title: "TB_vole code"
-<<<<<<< HEAD
-author: "JBV"
-=======
 author: "JB"
-output: html_document
->>>>>>> af2f2db237fa83c84de6da0e877c09a08dd1bc9a
 ---
 
 ```{r setup, include=FALSE}
@@ -75,6 +70,10 @@ spleenscore |>
   ylab("Pathology score") +
   theme(plot.title = element_text(size = 11)) +
   theme_classic()
+
+# save
+dev.copy(png, file="./plots/spleen_score.png", width=, height=)
+dev.off()
 ```
 
 ## Figure 3C | qPCR at 2TP
@@ -101,6 +100,10 @@ pcr |>
   theme(plot.title = element_text(size = 11)) +
   theme_classic()
   # theme_ipsum_rc()
+
+# save
+dev.copy(png, file="./plots/qPCR.png", width=, height=)
+dev.off()
 ```
 
 ## Figure 3D | Correlation spleen score qPCR
@@ -123,6 +126,10 @@ sc |>
   scale_y_continuous(name = "CFU equivalents (qPCR)") +
   labs(title = "") +
   theme_classic()
+
+# save
+dev.copy(png, file="./plots/correlation.png", width=, height=)
+dev.off()
 ```
 
 
@@ -153,6 +160,10 @@ liver |>
   theme(plot.title = element_text(size = 11)) +
   scale_color_viridis_d(option = "E", guide = "none") +
   theme_classic()
+
+# save
+dev.copy(png, file="./plots/granuloma_area.png", width=, height=)
+dev.off()
 ```
 
 
@@ -216,6 +227,10 @@ liver |>
   ylab("Granuloma area (um2)") +
   theme(plot.title = element_text(size = 11)) +
   theme_classic()
+
+# save
+dev.copy(png, file="./plots/liver_index.png", width=, height=)
+dev.off()
 ```
 
 
@@ -297,4 +312,8 @@ patindex_tp |>
   ylab("Pathology index") +
   theme(plot.title = element_text(size = 11)) +
   theme_classic()
+
+# save
+dev.copy(png, file="./plots/pathology_index.png", width=, height=)
+dev.off()
 ```
