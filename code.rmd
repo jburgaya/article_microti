@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ---
-Previous
+General variables
 ---
 
 Load packages
@@ -25,6 +25,9 @@ library(viridis) # color viz
 library(plotly) # interactive viz
 library(heatmaply) # heatmap
 library(ggpubr) # stats in ggplot
+library(RColorBrewer)
+library(ggthemes)
+library(ggstatsplot)
 ```
 
 Load data
@@ -34,8 +37,17 @@ scores <- read_excel("./data/scores.xlsx")
 liver <- read_excel("./data/liver.xlsx")
 ```
 
-patindex = pathology index [-BV27 | no representative organs obs, e.g. spleen]
+Rename TP
+```{r}
+data <- data |>
+  mutate(TP = ifelse(data$TP == "Late infection", "Late", "Early"))
+scores <- scores |>
+  mutate(TP = ifelse(scores$TP == "Late infection", "Late", "Early"))
+liver <- liver |>
+  mutate(TP = ifelse(liver$TP == "Late infection", "Late", "Early"))
+```
 
+patindex = pathology index [-BV27 | no representative organs obs, e.g. spleen]
 
 ---
 Data analysis
@@ -50,29 +62,36 @@ Spleen score based on the size, presence/absence of calcification, lesions.
 # Obtain spleen score data
 spleenscore <- scores |>
   dplyr::select(id, TP, Spleen)
+spleenscore
 
 # Stats
 # mean spleen score x TP
 aggregate(spleenscore[,3], list(spleenscore$TP), mean)
-# Mann-Whitney x TP
-wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE)
+# Mann-Whitney | one-tail
+wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
 # Viz
-spleenscore |>
+spleen_score <- spleenscore |>
   ggplot(aes(x=TP, y=Spleen, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
-  expand_limits(y=0) +
-  scale_fill_viridis(discrete = TRUE, alpha=0.6, option="E") +
-  geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 21, color = "black") +
-  stat_compare_means(label = "p.format") +
+  expand_limits(y = 0) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 3.2)) +
+  scale_fill_manual(values = c("#80CDC1", "#DFC27D")) + 
+  scale_alpha_manual(values = c(0.1, 0.1)) +
+  geom_jitter(show.legend = FALSE, width = 0.2, height = 0.05, shape = 19, color = "grey30", size = 1.5) +
+  annotate("text", x = "Early", y = 2.9, label = "italic(p) == 0.021", parse = T, size = 4) +
   ggtitle("") +
   xlab("") +
   ylab("Pathology score") +
-  theme(plot.title = element_text(size = 11)) +
-  theme_classic()
+  theme_classic(base_size = 15)
+spleen_score
 
 # save
 dev.copy(png, file="./plots/spleen_score.png", width=, height=)
+dev.off()
+
+# save as tiff
+tiff("./plots/spleen_score", compression = "zip")
 dev.off()
 ```
 
@@ -83,23 +102,26 @@ dev.off()
 pcr <- data |>
   select(id, TP, qPCR_spleen) |>
   mutate(logpcr = log10(qPCR_spleen))
+pcr
 
 # Stats
-wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE)
+# Mann-Whitney | one-tail
+wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
 # Viz
-pcr |>
+qPCR <- pcr |>
   ggplot(aes(x=TP, y=logpcr, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
-  scale_fill_viridis(discrete = TRUE, alpha=0.6, option="E") +
-  geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 21, color = "black") +
-  stat_compare_means(label = "p.format") +
+  scale_y_continuous(expand = c(0,0), limits = c(5.7, 9)) +
+  scale_fill_manual(values = c("#80CDC1", "#DFC27D"))+
+  scale_alpha_manual(values = c(0.1, 0.1)) +
+  geom_point(show.legend = FALSE, shape = 19, color = "grey30", size = 1.5) +
+  annotate("text", x = "Early", y = 8.9, label = "italic(p) = 0.091", parse = T) +
   ggtitle("") +
   xlab("")+
-  ylab("CFU equivalents (qPCR)") +
-  theme(plot.title = element_text(size = 11)) +
-  theme_classic()
-  # theme_ipsum_rc()
+  ylab("CFU equivalents (logqPCR)") +
+  theme_classic(base_size = 15)
+qPCR
 
 # save
 dev.copy(png, file="./plots/qPCR.png", width=, height=)
@@ -117,21 +139,19 @@ mutate(spleen = spleenscore$Spleen)
 sc |>
   ggscatter(x = "spleen", y = "logpcr",
             add = "reg.line",
-            add.params = list(color = "red", fill = "lightgray"),
-            conf.int = TRUE,
-            ) +
+            add.params = list(color = "blue", fill = "lightgray"),
+            conf.int = TRUE) +
   stat_cor(method = "spearman", label.x = 1,
            p.accuracy = 0.001, r.accuracy = 0.01, cor.coef.name = "rho") +
   scale_x_continuous(name = "Pathology score") +
   scale_y_continuous(name = "CFU equivalents (qPCR)") +
   labs(title = "") +
-  theme_classic()
+  theme_classic(base_size = 15)
 
 # save
 dev.copy(png, file="./plots/correlation.png", width=, height=)
 dev.off()
 ```
-
 
 # Progression Liver
 
@@ -145,27 +165,33 @@ liver
 liver$area <- as.numeric(liver$area)
 
 # stats
-wilcox.test(liver$area ~ liver$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE)
+# Mann-Whitney | one-tail
+# alternative = greater
+wilcox.test(liver$area ~ liver$TP, paired = FALSE, alternative = "greater", conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE)
+
+# median per TP
+median_area_TP <- aggregate(liver$area, list(TP = liver$TP), median)
+median_area_TP
 
 # viz
+# alternative = less | hypothesis: with the increase of TP the progression of the disease (aka; granuloma area will increase) == the area will increase with the progression of the TP
 liver |>
   ggplot(aes(x=TP, y=area, fill=TP)) +
-  geom_violin(show.legend = FALSE) +
-  scale_fill_viridis(discrete = TRUE, alpha = 0.6, option = "E") +
+  geom_violin(show.legend = FALSE, draw_quantiles = 0.5) +
+  scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +
   geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 21, color = "black") +
-  stat_compare_means(label = "p.format") +
-  ggtitle("Granuloma area") +
-  xlab("")+
+  stat_compare_means(method = "wilcox.test", method.args = list(alternative = "less"), label = "p.format") +
+  ggtitle("") +
+  xlab("") +
   ylab("Granuloma area (um2)") +
   theme(plot.title = element_text(size = 11)) +
   scale_color_viridis_d(option = "E", guide = "none") +
-  theme_classic()
+  theme_classic(base_size = 15)
 
 # save
-dev.copy(png, file="./plots/granuloma_area.png", width=, height=)
+dev.print(tiff, file="./plots/granuloma_area.tiff", width=, height=)
 dev.off()
 ```
-
 
 # Progression Pathology summary
 
@@ -205,10 +231,12 @@ liver
 
 # 2. quantile distribution | median
 quantile(liver$area, p = c(.25, .5, .75))
-median_total <- median(liver$area) # median total liver granuloma area
-median_area <- aggregate(liver$area, list(id = liver$id), median) # median total liver granuloma area x animal
 
 # 3. liver score
+median_total <- median(liver$area) # median total liver granuloma area
+median_area <- aggregate(liver$area, list(id = liver$id), median) # median total liver granuloma area x animal
+median_area
+
 liver_score <- median_area |>
   select(id) |>
   mutate(score = ifelse(median_area$x > median_total, 1, 0))
@@ -219,14 +247,14 @@ liver |>
   ggplot(aes(x = id, y = area, fill = TP)) +
   geom_boxplot() +
   rotate() +
-  scale_fill_viridis(discrete = TRUE, alpha = 0.6, option = "E") +
+  scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +
   geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 21, color = "black") +
   geom_hline(yintercept = quantile(liver$area, p = c(.25, .5, .75)), linetype = 2) +
   ggtitle("Liver index") +
   xlab("")+
   ylab("Granuloma area (um2)") +
   theme(plot.title = element_text(size = 11)) +
-  theme_classic()
+  theme_ggstatsplot()
 
 # save
 dev.copy(png, file="./plots/liver_index.png", width=, height=)
@@ -239,6 +267,7 @@ dev.off()
 ```{r}
 # obtain patindex
 # 1. select columns from scores
+scores
 patindex <- scores |>
   mutate(Liver = rowSums(scores[,8:10], na.rm = TRUE)) |>
   select(id, Thoracic, cLN, Peritoneum, ingLN, Spleen, Liver)
@@ -249,7 +278,7 @@ patindex <- patindex |>
 
 # 3. add TP col
 patindex <- patindex |>
-  mutate(TP = ifelse(scores$TP == "Early infection", 0, 1))
+  mutate(TP = ifelse(scores$TP == "Early", 0, 1))
 
 patindex
 ```
@@ -257,23 +286,39 @@ patindex
 
 ## Figure 5A | Pathology Summary
 
+Timepoints colors
+
 ```{r}
+BrBG <- grDevices::colorRampPalette(RColorBrewer::brewer.pal(11, "BrBG"))
+BrBG
+```
+
+Summary of the pathology | with the pathology index
+
+```{r}
+# library(microbenchmark) # hclust stats | TODO
+
 # data
 mat <- patindex
 mat <- mat %>%
   remove_rownames |>
   column_to_rownames(var = "id") |>
-  mutate(TP = ifelse(mat$TP == 1, "Late infection", "Early infection"))
+  mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
 mat
 
+row_side_col <- brewer.pal(3, "BrBG")
+row_side_col
+
 # viz | dynamic (ggheatmap() -> static)
-heatmaply(mat,
+heatmaply(mat[,-8],
           ylab = "", xlab = "",
-          main = "Pathology index",
+          main = "Pathology summary",
           dendogram = "row",
-          show_dendrogram = F,
+          show_dendrogram = c(F, F),
           label_names = c("Id", "Feature", "Value"),
-          grid_color = "white",
+          # row_side_colors = mat[,8],
+          # row_side_palette = c("Early" = "#D8B365", "Late" = "#5AB4AC"),
+          grid_color = NA, # white
           grid_size = 0.00000001,
           margins = c(60, 100, 40, 20),
           heatmap_layers = theme(axis.line = element_blank()),
@@ -283,13 +328,51 @@ heatmaply(mat,
 browseURL("./plots/pathology_index.html")
 ```
 
+Summary of the pathology
+
+```{r}
+# data
+nor <- mat
+nor$Index <- as.character(nor$Index)
+nor
+
+rc <- brewer.pal(5, "BrBG")
+
+# normalized data
+heatmaply(normalize(nor),
+          ylab = "", xlab = "",
+          main = "Pathology index",
+          dendogram = "both",
+          #colors = BrBG,
+          show_dendrogram = c(T, F),
+          label_names = c("Id", "Feature", "Value"),
+          row_side_palette = c("Early" = "#80CDC1", "Late" = "#DFC27D", "1" = "#709AE1FF",
+                               "2" = "#FED439FF", "3" = "#FD7446FF", "4" = "#D5E4A2FF",
+                               "5" = "#46732EFF", "6" = "#71D0F5FF", "7" = "#C80813FF",
+                               "8" = "#91331FFF", "9" = "#1A9993FF", "10" = "#FD8CC1FF"),
+          grid_color = NA,
+          grid_size = 0.00000001,
+          margins = c(60, 100, 40, 20),
+          heatmap_layers = theme(axis.line = element_blank()),
+          file = "./plots/pathology_summary.html",
+          plot_method = "plotly",
+          fontsize_row = 15,
+          fontsize_col = 15,
+          side_color_colorbar_len = 0.5)
+
+# open plot
+browseURL("./plots/pathology_summary.html")
+
+# save static plot
+browseURL("./plots/pathology_summary.tiff")
+```
 
 ## Figure 5B | Pathology index at 2TP
 
 ```{r}
 # Stats
 wilcox.test(patindex$Index ~ patindex$TP, 
-            alternative="two.sided", # alternative hypothesis
+            alternative="less", # alternative hypothesis
             paired = FALSE,
             conf.int = TRUE,
             conf.level = 0.95)
@@ -297,21 +380,22 @@ wilcox.test(patindex$Index ~ patindex$TP,
 # TP as Early/Late
 patindex_tp <- patindex |>
   select(Index, TP) |>
-  mutate(TP = ifelse(TP == 0, "Early infection", "Late infection"))
+  mutate(TP = ifelse(TP == 0, "Early", "Late"))
 patindex_tp
 
 # Viz
 patindex_tp |>
   ggplot(aes(x=TP, y=Index, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
-  scale_fill_viridis(discrete = TRUE, alpha=0.6, option="E") +
+  scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +  # option="A"
   geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 21, color = "black") +
   stat_compare_means(label = "p.format") +
+  expand_limits(y=0) +
   ggtitle("Pathology index") +
-  xlab("")+
+  xlab("Timepoints")+
   ylab("Pathology index") +
   theme(plot.title = element_text(size = 11)) +
-  theme_classic()
+  theme_ggstatsplot()
 
 # save
 dev.copy(png, file="./plots/pathology_index.png", width=, height=)
