@@ -70,6 +70,9 @@ aggregate(spleenscore[,3], list(spleenscore$TP), mean)
 # Mann-Whitney | one-tail
 wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
+# to save as tiff
+# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
+
 # Viz
 spleen_score <- spleenscore |>
   ggplot(aes(x=TP, y=Spleen, fill=TP)) +
@@ -86,13 +89,9 @@ spleen_score <- spleenscore |>
   theme_classic(base_size = 15)
 spleen_score
 
-# save
+# to save as png
 dev.copy(png, file="./plots/3B_spleen_score.png", width=, height=)
 dev.off()
-
-# save as tiff
-# tiff("./plots/3B_spleen_score", compression = "zip")
-# dev.off()
 ```
 
 ## Figure 3C | qPCR at 2TP
@@ -107,6 +106,9 @@ pcr
 # Stats
 # Mann-Whitney | one-tail
 wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
+
+# to save as tiff
+# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
 
 # Viz
 qPCR <- pcr |>
@@ -126,8 +128,6 @@ qPCR
 # save
 dev.copy(png, file="./plots/3C_qPCR.png", width=, height=)
 dev.off()
-
-# save as tiff
 ```
 
 ## Figure 3D | Correlation spleen score qPCR
@@ -136,6 +136,9 @@ dev.off()
 # Data
 sc <- pcr[-1,] |>
 mutate(spleen = spleenscore$Spleen)
+
+# to save as tiff
+# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
 
 # Viz
 sc |>
@@ -153,8 +156,6 @@ sc |>
 # save
 dev.copy(png, file="./plots/3D_correlation.png", width=, height=)
 dev.off()
-
-# save as tiff
 ```
 
 # Progression Liver
@@ -177,6 +178,9 @@ wilcox.test(liver$area ~ liver$TP, paired = FALSE, alternative = "greater", conf
 median_area_TP <- aggregate(liver$area, list(TP = liver$TP), median)
 median_area_TP
 
+# to save as tiff
+# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
+
 # viz
 # alternative = less | hypothesis: with the increase of TP the progression of the disease (aka; granuloma area will increase) == the area will increase with the progression of the TP
 liver |>
@@ -194,10 +198,8 @@ liver |>
   theme_classic(base_size = 15)
 
 # save
-dev.print(png, file="./plots/4_granuloma_area.png", width=, height=)
+dev.copy(png, file="./plots/4_granuloma_area.png", width=, height=)
 dev.off()
-
-# save as tiff
 ```
 
 # Progression Pathology summary
@@ -298,11 +300,14 @@ Summary of the pathology | with the pathology index
 ```{r}
 # data
 mat <- patindex
-mat <- mat |>
+mat <- mat %>%
   remove_rownames |>
   column_to_rownames(var = "id") |>
   mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
 mat
+
+# to save as tiff
+# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
 
 # viz | dynamic (ggheatmap() -> static)
 heatmaply(mat[,-8],
@@ -331,10 +336,8 @@ nor <- mat
 nor$Index <- as.character(nor$Index)
 nor
 
-rc <- brewer.pal(5, "BrBG")
-
 # normalized data
-heatmaply(normalize(nor[,1:6]),
+pat <- heatmaply(normalize(nor[,1:6]),
           ylab = "", xlab = "",
           plot_method = "plotly",
           main = "",
@@ -353,19 +356,29 @@ heatmaply(normalize(nor[,1:6]),
           heatmap_layers = theme(axis.line = element_blank()),
           fontsize_row = 15,
           fontsize_col = 15,
-          file = "./plots/pathology_summary.html",
+          file = "./plots/5A_pathology_index.html",
           colorbar_xpos = 1.025,
           colorbar_ypos = 0.6,
           key.title = "Score")
+pat
 
 # open plot
 browseURL("./plots/5A_pathology_index.html")
 
 # save static plot
 browseURL("./plots/5A_pathology_index.png")
-# as tiff
-
 ```
+
+TO DO | SAVE as STATIC
+
+library(reticulate) # to install python packages in R
+conda_create("r-reticulate")
+conda_install("r-reticulate", "plotly")
+import plotly.io as pio
+###
+from IPython.display import SVG, display
+img_bytes = pio.to_image(fig, format="svg")
+display(SVG(img_bytes))
 
 ## Figure 5B | Pathology index at 2TP
 
