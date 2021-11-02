@@ -298,7 +298,7 @@ Summary of the pathology | with the pathology index
 ```{r}
 # data
 mat <- patindex
-mat <- mat %>%
+mat <- mat |>
   remove_rownames |>
   column_to_rownames(var = "id") |>
   mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
