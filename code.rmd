@@ -71,9 +71,6 @@ aggregate(spleenscore[,3], list(spleenscore$TP), mean)
 # Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
 wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = FALSE, correct = TRUE, alternative = "less")
 
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
-
 # Viz
 spleen_score <- spleenscore |>
   ggplot(aes(x=TP, y=Spleen, fill=TP)) +
@@ -110,9 +107,6 @@ pcr
 # Stats
 # Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
 wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
-
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
 
 # Viz
 qPCR <- pcr |>
@@ -318,6 +312,7 @@ patindex
 
 
 ## Pathology Summary #########################################################
+# TO REMOVE
 
 # data
 mat <- patindex
@@ -375,7 +370,8 @@ pat <- heatmaply(normalize(nor[,1:6]),
           dendogram = "both",
           show_dendrogram = c(T, F),
           label_names = c("Id", "Feature", "Value"),
-          row_side_palette = c("Early" = "#80CDC1", "Late" = "#DFC27D", 
+          row_side_palette = c("Early" = "#80CDC1", 
+                               "Late" = "#DFC27D", 
                                "1" = "#FFE2E2",
                                "2" = "#FFD2D2",
                                "3" = "#FFBABA",
