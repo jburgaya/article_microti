@@ -83,11 +83,11 @@ spleen_score <- spleenscore |>
   scale_fill_manual(values = c("#80CDC1", "#DFC27D")) + 
   scale_alpha_manual(values = c(0.1, 0.1)) +
   geom_jitter(show.legend = FALSE, width = 0.2, height = 0.05, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 2.9, label = "italic(p) == 0.021", parse = T, size = 4.3) +
+  annotate("text", x = "Early", y = 2.9, label = "italic(p) == 0.021", parse = T, size = 5) +
   ggtitle("") +
   xlab("") +
   ylab("Pathology score") +
-  theme_classic(base_size = 15)
+  theme_classic(base_size = 20)
 spleen_score
 
 # to save as svg
@@ -122,11 +122,11 @@ qPCR <- pcr |>
   scale_fill_manual(values = c("#80CDC1", "#DFC27D"))+
   scale_alpha_manual(values = c(0.1, 0.1)) +
   geom_point(show.legend = FALSE, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 8.9, label = "italic(p) == 0.091", parse = T, size = 4.3) +
+  annotate("text", x = "Early", y = 8.9, label = "italic(p) == 0.091", parse = T, size = 5) +
   ggtitle("") +
   xlab("")+
   ylab("CFU equivalents (logqPCR)") +
-  theme_classic(base_size = 15)
+  theme_classic(base_size = 20)
 qPCR
 
 # to save as svg
@@ -156,9 +156,9 @@ corr <- sc |>
   stat_cor(method = "spearman", label.x = 1, label.y = 9,
            p.accuracy = 0.001, r.accuracy = 0.01, cor.coef.name = "rho") +
   scale_x_continuous(name = "Pathology score") +
-  scale_y_continuous(name = "CFU equivalents (qPCR)") +
+  scale_y_continuous(name = "CFU equivalents (logqPCR)") +
   labs(title = "") +
-  theme_classic(base_size = 15)
+  theme_classic(base_size = 20)
 corr
 
 # to save as svg
@@ -182,15 +182,16 @@ liver$area <- as.numeric(liver$area)
 
 # stats
 # Mann-Whitney | One-tail | Hyp: the median at Early TP is less than at Late TP
-# alternative = greater
+# alternative = less
 wilcox.test(liver$area ~ liver$TP, paired = FALSE, conf.int = TRUE, , alternative = "less", conf.level = 0.95, exact = FALSE, correct = TRUE)
 
 # median per TP
 median_area_TP <- aggregate(liver$area, list(TP = liver$TP), median)
 median_area_TP
 
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
+# n granulomas x tP
+num <- count(liver, TP)
+num
 
 # viz
 # Mann-Whitney | One-tail | alternative = less
@@ -199,16 +200,17 @@ median_area_TP
 gran <- liver |>
   ggplot(aes(x=TP, y=area, fill=TP)) +
   geom_violin(show.legend = FALSE, draw_quantiles = 0.5) +
+  scale_x_discrete(labels = c("Early" = "Early\nn=94", "Late" = "Late\nn=152"))+
   scale_y_continuous(expand = c(0,0), limits = c(0, 80000)) +
   scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +
   geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.96", parse = T, size = 4.3) +
+  annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.96", parse = T, size = 5) +
   ggtitle("") +
   xlab("") +
   ylab("Granuloma area (um2)") +
   theme(plot.title = element_text(size = 11)) +
   scale_color_viridis_d(option = "E", guide = "none") +
-  theme_classic(base_size = 15)
+  theme_classic(base_size = 20)
 gran
 
 # to save as svg
@@ -218,6 +220,7 @@ ggsave(file="./plots/4_granuloma_area.svg", plot=gran, width=10, height=8)
 dev.copy(png, file="./plots/4_granuloma_area.png", width=, height=)
 dev.off()
 ```
+
 
 # Progression Pathology summary
 
@@ -309,9 +312,7 @@ patindex
 ```
 
 
-## Figure 5A | Pathology Summary
-
-Summary of the pathology | with the pathology index
+## Pathology Summary
 
 ```{r}
 # data
@@ -344,16 +345,15 @@ heatmaply(mat[,-8],
 browseURL("./plots/pathology_summary.html")
 ```
 
-Summary of the pathology
+## Figure 5A | Summary of the pathology
+
+Summary of the pathology | with the pathology index
 
 ```{r}
 # data
 nor <- mat
 nor$Index <- as.character(nor$Index)
 nor
-
-# to save heatmamply
-webshot::install_phantomjs()
 
 # normalized data
 pat <- heatmaply(normalize(nor[,1:6]),
@@ -373,8 +373,8 @@ pat <- heatmaply(normalize(nor[,1:6]),
           #grid_size = 0.00000001,
           margins = c(60, 100, 40, 20),
           heatmap_layers = theme(axis.line = element_blank()),
-          fontsize_row = 15,
-          fontsize_col = 15,
+          fontsize_row = 30,
+          fontsize_col = 30,
           file = "./plots/5A_pathology_index.html",
           colorbar_xpos = 1.025,
           colorbar_ypos = 0.6,
@@ -385,20 +385,8 @@ pat
 browseURL("./plots/5A_pathology_index.html")
 
 # save as svg
-r
 
 ```
-
-TO DO | SAVE as STATIC
-
-library(reticulate) # to install python packages in R
-conda_create("r-reticulate")
-conda_install("r-reticulate", "plotly")
-import plotly.io as pio
-###
-from IPython.display import SVG, display
-img_bytes = pio.to_image(fig, format="svg")
-display(SVG(img_bytes))
 
 ## Figure 5B | Pathology index at 2TP
 
@@ -425,13 +413,16 @@ patindex_tp |>
   expand_limits(y = 0) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 10.2)) +
   geom_point(show.legend = FALSE, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 9.9, label = "italic(p) == 0.01", parse = T, size = 4.3)+
+  annotate("text", x = "Early", y = 9.9, label = "italic(p) == 0.01", parse = T, size = 5)+
   expand_limits(y=0) +
   ggtitle("") +
-  xlab("Timepoints")+
+  xlab("")+
   ylab("Pathology index") +
   theme(plot.title = element_text(size = 11)) +
-  theme_classic(base_size = 15)
+  theme_classic(base_size = 20)
+
+# save as svg
+ggsave(file="./plots/5B_pathology_index.svg", plot=gran, width=10, height=8)
 
 # save
 dev.copy(png, file="./plots/5B_pathology_index.png", width=, height=)
