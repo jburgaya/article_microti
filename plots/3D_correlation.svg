@@ -79,6 +79,6 @@
 <text x='530.39' y='539.15' text-anchor='middle' style='font-size: 16.00px; fill: #4D4D4D; font-family: Arial;' textLength='22.24px' lengthAdjust='spacingAndGlyphs'>2.5</text>
 <text x='680.10' y='539.15' text-anchor='middle' style='font-size: 16.00px; fill: #4D4D4D; font-family: Arial;' textLength='22.24px' lengthAdjust='spacingAndGlyphs'>3.0</text>
 <text x='380.69' y='561.83' text-anchor='middle' style='font-size: 20.00px; font-family: Arial;' textLength='143.43px' lengthAdjust='spacingAndGlyphs'>Pathology score</text>
-<text transform='translate(24.28,280.45) rotate(-90)' text-anchor='middle' style='font-size: 20.00px; font-family: Arial;' textLength='220.08px' lengthAdjust='spacingAndGlyphs'>CFU equivalents (qPCR)</text>
+<text transform='translate(24.28,280.45) rotate(-90)' text-anchor='middle' style='font-size: 20.00px; font-family: Arial;' textLength='246.77px' lengthAdjust='spacingAndGlyphs'>CFU equivalents (logqPCR)</text>
 </g>
 </svg>
