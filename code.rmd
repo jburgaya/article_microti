@@ -28,6 +28,7 @@ library(ggpubr) # stats in ggplot
 library(RColorBrewer)
 library(ggthemes)
 library(ggstatsplot)
+library(svglite) # to save as svg
 ```
 
 Load data
@@ -67,8 +68,8 @@ spleenscore
 # Stats
 # mean spleen score x TP
 aggregate(spleenscore[,3], list(spleenscore$TP), mean)
-# Mann-Whitney | one-tail
-wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
+# Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
+wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = FALSE, correct = TRUE, alternative = "less")
 
 # to save as tiff
 # tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
@@ -89,6 +90,9 @@ spleen_score <- spleenscore |>
   theme_classic(base_size = 15)
 spleen_score
 
+# to save as svg
+ggsave(file="./plots/3B_spleen_score.svg", plot=spleen_score, width=10, height=8)
+
 # to save as png
 dev.copy(png, file="./plots/3B_spleen_score.png", width=, height=)
 dev.off()
@@ -104,7 +108,7 @@ pcr <- data |>
 pcr
 
 # Stats
-# Mann-Whitney | one-tail
+# Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
 wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
 # to save as tiff
@@ -125,6 +129,9 @@ qPCR <- pcr |>
   theme_classic(base_size = 15)
 qPCR
 
+# to save as svg
+ggsave(file="./plots/3C_qPCR.svg", plot=qPCR, width=10, height=8)
+
 # save
 dev.copy(png, file="./plots/3C_qPCR.png", width=, height=)
 dev.off()
@@ -141,7 +148,7 @@ mutate(spleen = spleenscore$Spleen)
 # tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
 
 # Viz
-sc |>
+corr <- sc |>
   ggscatter(x = "spleen", y = "logpcr",
             add = "reg.line",
             add.params = list(color = "blue", fill = "lightgray"),
@@ -152,6 +159,10 @@ sc |>
   scale_y_continuous(name = "CFU equivalents (qPCR)") +
   labs(title = "") +
   theme_classic(base_size = 15)
+corr
+
+# to save as svg
+ggsave(file="./plots/3D_correlation.svg", plot=corr, width=10, height=8)
 
 # save
 dev.copy(png, file="./plots/3D_correlation.png", width=, height=)
@@ -170,9 +181,9 @@ liver
 liver$area <- as.numeric(liver$area)
 
 # stats
-# Mann-Whitney | one-tail
+# Mann-Whitney | One-tail | Hyp: the median at Early TP is less than at Late TP
 # alternative = greater
-wilcox.test(liver$area ~ liver$TP, paired = FALSE, alternative = "greater", conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE)
+wilcox.test(liver$area ~ liver$TP, paired = FALSE, conf.int = TRUE, , alternative = "less", conf.level = 0.95, exact = FALSE, correct = TRUE)
 
 # median per TP
 median_area_TP <- aggregate(liver$area, list(TP = liver$TP), median)
@@ -182,20 +193,26 @@ median_area_TP
 # tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
 
 # viz
-# alternative = less | hypothesis: with the increase of TP the progression of the disease (aka; granuloma area will increase) == the area will increase with the progression of the TP
-liver |>
+# Mann-Whitney | One-tail | alternative = less
+# Hyp: the median at Early TP is less than at Late TP
+# With two-tails p = 0.061 > hyp: the area is different between the early and late time points
+gran <- liver |>
   ggplot(aes(x=TP, y=area, fill=TP)) +
   geom_violin(show.legend = FALSE, draw_quantiles = 0.5) +
   scale_y_continuous(expand = c(0,0), limits = c(0, 80000)) +
   scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +
   geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.031", parse = T, size = 4.3) +
+  annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.96", parse = T, size = 4.3) +
   ggtitle("") +
   xlab("") +
   ylab("Granuloma area (um2)") +
   theme(plot.title = element_text(size = 11)) +
   scale_color_viridis_d(option = "E", guide = "none") +
   theme_classic(base_size = 15)
+gran
+
+# to save as svg
+ggsave(file="./plots/4_granuloma_area.svg", plot=gran, width=10, height=8)
 
 # save
 dev.copy(png, file="./plots/4_granuloma_area.png", width=, height=)
@@ -240,12 +257,11 @@ liver
 
 # 2. quantile distribution | median
 quantile(liver$area, p = c(.25, .5, .75))
-
-# 3. liver score
 median_total <- median(liver$area) # median total liver granuloma area
 median_area <- aggregate(liver$area, list(id = liver$id), median) # median total liver granuloma area x animal
 median_area
 
+# 3. liver score
 liver_score <- median_area |>
   select(id) |>
   mutate(score = ifelse(median_area$x > median_total, 1, 0))
@@ -336,6 +352,9 @@ nor <- mat
 nor$Index <- as.character(nor$Index)
 nor
 
+# to save heatmamply
+webshot::install_phantomjs()
+
 # normalized data
 pat <- heatmaply(normalize(nor[,1:6]),
           ylab = "", xlab = "",
@@ -365,8 +384,9 @@ pat
 # open plot
 browseURL("./plots/5A_pathology_index.html")
 
-# save static plot
-browseURL("./plots/5A_pathology_index.png")
+# save as svg
+r
+
 ```
 
 TO DO | SAVE as STATIC
