@@ -3,7 +3,6 @@
 ---
 title: "TB_vole code"
 author: "JB"
-output: rmarkdown::github_document
 ---
 
 ```{r setup, include=TRUE}
