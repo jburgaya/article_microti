@@ -83,11 +83,11 @@ spleen_score <- spleenscore |>
   scale_fill_manual(values = c("#80CDC1", "#DFC27D")) + 
   scale_alpha_manual(values = c(0.1, 0.1)) +
   geom_jitter(show.legend = FALSE, width = 0.2, height = 0.05, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 2.9, label = "italic(p) == 0.021", parse = T, size = 5) +
+  annotate("text", x = "Early", y = 2.9, label = "italic(p) == 0.021", parse = T, size = 7) +
   ggtitle("") +
   xlab("") +
   ylab("Pathology score") +
-  theme_classic(base_size = 20)
+  theme_classic(base_size = 25)
 spleen_score
 
 # to save as svg
@@ -122,11 +122,11 @@ qPCR <- pcr |>
   scale_fill_manual(values = c("#80CDC1", "#DFC27D"))+
   scale_alpha_manual(values = c(0.1, 0.1)) +
   geom_point(show.legend = FALSE, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 8.9, label = "italic(p) == 0.091", parse = T, size = 5) +
+  annotate("text", x = "Early", y = 8.7, label = "italic(p) == 0.091", parse = T, size = 7) +
   ggtitle("") +
   xlab("")+
   ylab("CFU equivalents (logqPCR)") +
-  theme_classic(base_size = 20)
+  theme_classic(base_size = 25)
 qPCR
 
 # to save as svg
@@ -144,8 +144,12 @@ dev.off()
 sc <- pcr[-1,] |>
 mutate(spleen = spleenscore$Spleen)
 
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
+# Stats
+# Spearman correlation
+cor.test(sc$spleen, sc$logpcr,
+         method = "spearman",
+         cor.coef.name = "rho")
+
 
 # Viz
 corr <- sc |>
@@ -153,13 +157,14 @@ corr <- sc |>
             add = "reg.line",
             add.params = list(color = "blue", fill = "lightgray"),
             conf.int = TRUE) +
-  stat_cor(method = "spearman", label.x = 1, label.y = 9,
-           p.accuracy = 0.001, r.accuracy = 0.01, cor.coef.name = "rho") +
+  annotate("text", x = 1.2, y = 9, label = "italic(rho) == 0.7", parse = T, size = 7) + 
+  annotate("text", x = 1.6, y = 9, label = "italic(p) == 0.008", parse = T, size = 7) +
   scale_x_continuous(name = "Pathology score") +
   scale_y_continuous(name = "CFU equivalents (logqPCR)") +
   labs(title = "") +
-  theme_classic(base_size = 20)
+  theme_classic(base_size = 25)
 corr
+
 
 # to save as svg
 ggsave(file="./plots/3D_correlation.svg", plot=corr, width=10, height=8)
@@ -204,13 +209,13 @@ gran <- liver |>
   scale_y_continuous(expand = c(0,0), limits = c(0, 80000)) +
   scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +
   geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.96", parse = T, size = 5) +
+  annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.96", parse = T, size = 7) +
   ggtitle("") +
   xlab("") +
   ylab("Granuloma area (um2)") +
   theme(plot.title = element_text(size = 11)) +
   scale_color_viridis_d(option = "E", guide = "none") +
-  theme_classic(base_size = 20)
+  theme_classic(base_size = 25)
 gran
 
 # to save as svg
@@ -312,9 +317,8 @@ patindex
 ```
 
 
-## Pathology Summary
+## Pathology Summary #########################################################
 
-```{r}
 # data
 mat <- patindex
 mat <- mat %>%
@@ -343,7 +347,9 @@ heatmaply(mat[,-8],
 
 # open plot
 browseURL("./plots/pathology_summary.html")
-```
+
+##############################################################################
+
 
 ## Figure 5A | Summary of the pathology
 
@@ -351,6 +357,12 @@ Summary of the pathology | with the pathology index
 
 ```{r}
 # data
+mat <- patindex
+mat <- mat %>%
+  remove_rownames |>
+  column_to_rownames(var = "id") |>
+  mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
+mat
 nor <- mat
 nor$Index <- as.character(nor$Index)
 nor
@@ -363,10 +375,17 @@ pat <- heatmaply(normalize(nor[,1:6]),
           dendogram = "both",
           show_dendrogram = c(T, F),
           label_names = c("Id", "Feature", "Value"),
-          row_side_palette = c("Early" = "#80CDC1", "Late" = "#DFC27D", "1" = "#709AE1FF",
-                               "2" = "#FED439FF", "3" = "#FD7446FF", "4" = "#D5E4A2FF",
-                               "5" = "#46732EFF", "6" = "#71D0F5FF", "7" = "#C80813FF",
-                               "8" = "#91331FFF", "9" = "#1A9993FF", "10" = "#FD8CC1FF"),
+          row_side_palette = c("Early" = "#80CDC1", "Late" = "#DFC27D", 
+                               "1" = "#FFE2E2",
+                               "2" = "#FFD2D2",
+                               "3" = "#FFBABA",
+                               "4" = "#FF9F9F",
+                               "5" = "#FF8B8B",
+                               "6" = "#FF7373",
+                               "7" = "#FF5A5A",
+                               "8" = "#FF4444",
+                               "9" = "#FF2525",
+                               "10" = "#D80000"),
           row_side_colors = data.frame(nor[,7:8]),
           side_color_colorbar_len = 0.5,
           grid_color = NA,
@@ -385,7 +404,7 @@ pat
 browseURL("./plots/5A_pathology_index.html")
 
 # save as svg
-
+??heatmaply
 ```
 
 ## Figure 5B | Pathology index at 2TP
@@ -413,13 +432,13 @@ patindex_tp |>
   expand_limits(y = 0) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 10.2)) +
   geom_point(show.legend = FALSE, shape = 19, color = "grey30", size = 1.5) +
-  annotate("text", x = "Early", y = 9.9, label = "italic(p) == 0.01", parse = T, size = 5)+
+  annotate("text", x = "Early", y = 9.9, label = "italic(p) == 0.01", parse = T, size = 7)+
   expand_limits(y=0) +
   ggtitle("") +
   xlab("")+
   ylab("Pathology index") +
   theme(plot.title = element_text(size = 11)) +
-  theme_classic(base_size = 20)
+  theme_classic(base_size = 25)
 
 # save as svg
 ggsave(file="./plots/5B_pathology_index.svg", plot=gran, width=10, height=8)
