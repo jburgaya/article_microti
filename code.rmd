@@ -16,15 +16,15 @@ General variables
 Load packages
 ```{r}
 library(readxl) # read .xlsx files
-library(dplyr) # data
-library(tidyverse) # data
-library(ggplot2) # viz
-library(hrbrthemes) # viz themes
-library(viridisLite) # color viz
-library(viridis) # color viz
-library(plotly) # interactive viz
-library(heatmaply) # heatmap
-library(ggpubr) # stats in ggplot
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(hrbrthemes)
+library(viridisLite)
+library(viridis)
+library(plotly)
+library(heatmaply)
+library(ggpubr)
 library(RColorBrewer)
 library(ggthemes)
 library(ggstatsplot)
@@ -48,8 +48,6 @@ liver <- liver |>
   mutate(TP = ifelse(liver$TP == "Late infection", "Late", "Early"))
 ```
 
-patindex = pathology index [-BV27 | no representative organs obs, e.g. spleen]
-
 ---
 Data analysis
 ---
@@ -70,9 +68,6 @@ spleenscore
 aggregate(spleenscore[,3], list(spleenscore$TP), mean)
 # Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
 wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = FALSE, correct = TRUE, alternative = "less")
-
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
 
 # Viz
 spleen_score <- spleenscore |>
@@ -111,9 +106,6 @@ pcr
 # Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
 wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
-
 # Viz
 qPCR <- pcr |>
   ggplot(aes(x=TP, y=logpcr, fill=TP)) +
@@ -125,7 +117,7 @@ qPCR <- pcr |>
   annotate("text", x = "Early", y = 8.7, label = "italic(p) == 0.091", parse = T, size = 7) +
   ggtitle("") +
   xlab("")+
-  ylab("CFU equivalents (logqPCR)") +
+  ylab = expression("Log10 CFU equivalents (qPCR)") +
   theme_classic(base_size = 25)
 qPCR
 
@@ -317,43 +309,11 @@ patindex
 ```
 
 
-## Pathology Summary #########################################################
-
-# data
-mat <- patindex
-mat <- mat %>%
-  remove_rownames |>
-  column_to_rownames(var = "id") |>
-  mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
-mat
-
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
-
-# viz | dynamic (ggheatmap() -> static)
-heatmaply(mat[,-8],
-          ylab = "", xlab = "",
-          main = "Pathology summary",
-          dendogram = "row",
-          show_dendrogram = c(F, F),
-          label_names = c("Id", "Feature", "Value"),
-          # row_side_colors = mat[,8],
-          # row_side_palette = c("Early" = "#D8B365", "Late" = "#5AB4AC"),
-          grid_color = NA, # white
-          grid_size = 0.00000001,
-          margins = c(60, 100, 40, 20),
-          heatmap_layers = theme(axis.line = element_blank()),
-          file = "./plots/pathology_summary.html")
-
-# open plot
-browseURL("./plots/pathology_summary.html")
-
-##############################################################################
-
-
 ## Figure 5A | Summary of the pathology
 
 Summary of the pathology | with the pathology index
+
+> Run to get the interactive plot
 
 ```{r}
 # data
@@ -362,7 +322,6 @@ mat <- mat %>%
   remove_rownames |>
   column_to_rownames(var = "id") |>
   mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
-mat
 nor <- mat
 nor$Index <- as.character(nor$Index)
 nor
