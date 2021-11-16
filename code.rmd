@@ -53,23 +53,25 @@ Data analysis
 ---
 
 # Progression Spleen
+
 Spleen score based on the size, presence/absence of calcification, lesions.
 
 ## Figure 3B | Spleen score at 2TP
 
 ```{r}
-# Obtain spleen score data
+# spleen score data
 spleenscore <- scores |>
   dplyr::select(id, TP, Spleen)
 spleenscore
 
-# Stats
 # mean spleen score x TP
 aggregate(spleenscore[,3], list(spleenscore$TP), mean)
-# Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
+
+# stats
+# mann-Whitney | one-tail
 wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = FALSE, correct = TRUE, alternative = "less")
 
-# Viz
+# viz
 spleen_score <- spleenscore |>
   ggplot(aes(x=TP, y=Spleen, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
@@ -96,17 +98,17 @@ dev.off()
 ## Figure 3C | qPCR at 2TP
 
 ```{r}
-# Obtain spleen score data in log scale
+# spleen score data in log scale
 pcr <- data |>
   select(id, TP, qPCR_spleen) |>
   mutate(logpcr = log10(qPCR_spleen))
 pcr
 
-# Stats
-# Mann-Whitney | one-tail | Hyp: the median at Early TP is less than at Late TP
+# stats
+# mann-whitney | one-tail
 wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
-# Viz
+# viz
 qPCR <- pcr |>
   ggplot(aes(x=TP, y=logpcr, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
@@ -116,8 +118,8 @@ qPCR <- pcr |>
   geom_point(show.legend = FALSE, shape = 19, color = "grey30", size = 1.5) +
   annotate("text", x = "Early", y = 8.7, label = "italic(p) == 0.091", parse = T, size = 7) +
   ggtitle("") +
-  xlab("")+
-  ylab = expression("Log10 CFU equivalents (qPCR)") +
+  xlab("") +
+  ylab("Log10 CFU equivalents (qPCR)") +
   theme_classic(base_size = 25)
 qPCR
 
@@ -132,18 +134,18 @@ dev.off()
 ## Figure 3D | Correlation spleen score qPCR
 
 ```{r}
-# Data
+# data
 sc <- pcr[-1,] |>
 mutate(spleen = spleenscore$Spleen)
 
-# Stats
-# Spearman correlation
+# stats
+# spearman correlation
 cor.test(sc$spleen, sc$logpcr,
          method = "spearman",
          cor.coef.name = "rho")
 
 
-# Viz
+# viz
 corr <- sc |>
   ggscatter(x = "spleen", y = "logpcr",
             add = "reg.line",
@@ -152,7 +154,7 @@ corr <- sc |>
   annotate("text", x = 1.2, y = 9, label = "italic(rho) == 0.7", parse = T, size = 7) + 
   annotate("text", x = 1.6, y = 9, label = "italic(p) == 0.008", parse = T, size = 7) +
   scale_x_continuous(name = "Pathology score") +
-  scale_y_continuous(name = "CFU equivalents (logqPCR)") +
+  scale_y_continuous(name = "Log10 CFU equivalents (qPCR)") +
   labs(title = "") +
   theme_classic(base_size = 25)
 corr
@@ -178,22 +180,18 @@ liver
 liver$area <- as.numeric(liver$area)
 
 # stats
-# Mann-Whitney | One-tail | Hyp: the median at Early TP is less than at Late TP
-# alternative = less
-wilcox.test(liver$area ~ liver$TP, paired = FALSE, conf.int = TRUE, , alternative = "less", conf.level = 0.95, exact = FALSE, correct = TRUE)
+# mann-whitney | one-tail
+wilcox.test(liver$area ~ liver$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
 # median per TP
 median_area_TP <- aggregate(liver$area, list(TP = liver$TP), median)
 median_area_TP
 
-# n granulomas x tP
+# n granulomas x TP
 num <- count(liver, TP)
 num
 
 # viz
-# Mann-Whitney | One-tail | alternative = less
-# Hyp: the median at Early TP is less than at Late TP
-# With two-tails p = 0.061 > hyp: the area is different between the early and late time points
 gran <- liver |>
   ggplot(aes(x=TP, y=area, fill=TP)) +
   geom_violin(show.legend = FALSE, draw_quantiles = 0.5) +
@@ -227,9 +225,8 @@ Representation of the pathology progression.
     presence/absence: 1-0
     multiple score*: 3-0
 
-*varies according the organ assessment of the pathology progression/description
-  
-  Indices:
+*according to the pathology progression/description on each organ:
+
     Patindex: 0-11; sum different pathology indices
     Thoracic: 0-2;
             lung (0-1) + thoracic lymph node (0-1)
@@ -290,7 +287,6 @@ dev.off()
 ## Patindex
 
 ```{r}
-# obtain patindex
 # 1. select columns from scores
 scores
 patindex <- scores |>
@@ -369,8 +365,11 @@ browseURL("./plots/5A_pathology_index.html")
 ## Figure 5B | Pathology index at 2TP
 
 ```{r}
-# Stats
-# Mann-whitney | one-tail
+# data
+patindex
+
+# stats
+# mann-whitney | one-tail
 wilcox.test(patindex$Index ~ patindex$TP, 
             alternative="less", # alternative hypothesis
             paired = FALSE,
@@ -382,8 +381,9 @@ patindex_tp <- patindex |>
   select(Index, TP) |>
   mutate(TP = ifelse(TP == 0, "Early", "Late"))
 patindex_tp
+patindex
 
-# Viz
+# viz
 patindex_tp |>
   ggplot(aes(x=TP, y=Index, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
