@@ -5,7 +5,7 @@ title: "TB_vole code"
 author: "JB"
 ---
 
-```{r setup, include=TRUE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -67,15 +67,11 @@ spleenscore
 # mean spleen score x TP
 aggregate(spleenscore[,3], list(spleenscore$TP), mean)
 
-<<<<<<< HEAD
 # stats
 # mann-Whitney | one-tail
 wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = FALSE, correct = TRUE, alternative = "less")
 
 # viz
-=======
-# Viz
->>>>>>> d0549b5ac4f0f53fb519627ab7c0cd8fff976ce5
 spleen_score <- spleenscore |>
   ggplot(aes(x=TP, y=Spleen, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
@@ -112,11 +108,7 @@ pcr
 # mann-whitney | one-tail
 wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
-<<<<<<< HEAD
 # viz
-=======
-# Viz
->>>>>>> d0549b5ac4f0f53fb519627ab7c0cd8fff976ce5
 qPCR <- pcr |>
   ggplot(aes(x=TP, y=logpcr, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
@@ -127,7 +119,7 @@ qPCR <- pcr |>
   annotate("text", x = "Early", y = 8.7, label = "italic(p) == 0.091", parse = T, size = 7) +
   ggtitle("") +
   xlab("") +
-  ylab("Log10 CFU equivalents (qPCR)") +
+  ylab(expression("Log"[10]*" CFU equivalents (qPCR)")) +
   theme_classic(base_size = 25)
 qPCR
 
@@ -162,7 +154,7 @@ corr <- sc |>
   annotate("text", x = 1.2, y = 9, label = "italic(rho) == 0.7", parse = T, size = 7) + 
   annotate("text", x = 1.6, y = 9, label = "italic(p) == 0.008", parse = T, size = 7) +
   scale_x_continuous(name = "Pathology score") +
-  scale_y_continuous(name = "Log10 CFU equivalents (qPCR)") +
+  scale_y_continuous(name = expression("Log"[10]*" CFU equivalents (qPCR)")) +
   labs(title = "") +
   theme_classic(base_size = 25)
 corr
@@ -210,7 +202,7 @@ gran <- liver |>
   annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.96", parse = T, size = 7) +
   ggtitle("") +
   xlab("") +
-  ylab("Granuloma area (um2)") +
+  ylab(expression("Granuloma area (µm"^2* ")")) +
   theme(plot.title = element_text(size = 11)) +
   scale_color_viridis_d(option = "E", guide = "none") +
   theme_classic(base_size = 25)
@@ -313,44 +305,6 @@ patindex
 ```
 
 
-<<<<<<< HEAD
-=======
-## Pathology Summary #########################################################
-# TO REMOVE
-
-# data
-mat <- patindex
-mat <- mat %>%
-  remove_rownames |>
-  column_to_rownames(var = "id") |>
-  mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
-mat
-
-# to save as tiff
-# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
-
-# viz | dynamic (ggheatmap() -> static)
-heatmaply(mat[,-8],
-          ylab = "", xlab = "",
-          main = "Pathology summary",
-          dendogram = "row",
-          show_dendrogram = c(F, F),
-          label_names = c("Id", "Feature", "Value"),
-          # row_side_colors = mat[,8],
-          # row_side_palette = c("Early" = "#D8B365", "Late" = "#5AB4AC"),
-          grid_color = NA, # white
-          grid_size = 0.00000001,
-          margins = c(60, 100, 40, 20),
-          heatmap_layers = theme(axis.line = element_blank()),
-          file = "./plots/pathology_summary.html")
-
-# open plot
-browseURL("./plots/pathology_summary.html")
-
-##############################################################################
-
-
->>>>>>> d0549b5ac4f0f53fb519627ab7c0cd8fff976ce5
 ## Figure 5A | Summary of the pathology
 
 Summary of the pathology | with the pathology index
@@ -376,8 +330,7 @@ pat <- heatmaply(normalize(nor[,1:6]),
           dendogram = "both",
           show_dendrogram = c(T, F),
           label_names = c("Id", "Feature", "Value"),
-          row_side_palette = c("Early" = "#80CDC1", 
-                               "Late" = "#DFC27D", 
+          row_side_palette = c("Early" = "#80CDC1", "Late" = "#DFC27D", 
                                "1" = "#FFE2E2",
                                "2" = "#FFD2D2",
                                "3" = "#FFBABA",
