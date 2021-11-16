@@ -5,7 +5,7 @@ title: "TB_vole code"
 author: "JB"
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -67,11 +67,15 @@ spleenscore
 # mean spleen score x TP
 aggregate(spleenscore[,3], list(spleenscore$TP), mean)
 
+<<<<<<< HEAD
 # stats
 # mann-Whitney | one-tail
 wilcox.test(spleenscore$Spleen ~ spleenscore$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = FALSE, correct = TRUE, alternative = "less")
 
 # viz
+=======
+# Viz
+>>>>>>> d0549b5ac4f0f53fb519627ab7c0cd8fff976ce5
 spleen_score <- spleenscore |>
   ggplot(aes(x=TP, y=Spleen, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
@@ -108,7 +112,11 @@ pcr
 # mann-whitney | one-tail
 wilcox.test(pcr$qPCR_spleen ~ pcr$TP, paired = FALSE, conf.int = TRUE, conf.level = 0.95, exact = TRUE, correct = TRUE, alternative = "less")
 
+<<<<<<< HEAD
 # viz
+=======
+# Viz
+>>>>>>> d0549b5ac4f0f53fb519627ab7c0cd8fff976ce5
 qPCR <- pcr |>
   ggplot(aes(x=TP, y=logpcr, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
@@ -305,6 +313,44 @@ patindex
 ```
 
 
+<<<<<<< HEAD
+=======
+## Pathology Summary #########################################################
+# TO REMOVE
+
+# data
+mat <- patindex
+mat <- mat %>%
+  remove_rownames |>
+  column_to_rownames(var = "id") |>
+  mutate(TP = ifelse(mat$TP == 1, "Late", "Early"))
+mat
+
+# to save as tiff
+# tiff(file = "./plots/3B_spleen_score", units="in", width=5, height=4, res=300)
+
+# viz | dynamic (ggheatmap() -> static)
+heatmaply(mat[,-8],
+          ylab = "", xlab = "",
+          main = "Pathology summary",
+          dendogram = "row",
+          show_dendrogram = c(F, F),
+          label_names = c("Id", "Feature", "Value"),
+          # row_side_colors = mat[,8],
+          # row_side_palette = c("Early" = "#D8B365", "Late" = "#5AB4AC"),
+          grid_color = NA, # white
+          grid_size = 0.00000001,
+          margins = c(60, 100, 40, 20),
+          heatmap_layers = theme(axis.line = element_blank()),
+          file = "./plots/pathology_summary.html")
+
+# open plot
+browseURL("./plots/pathology_summary.html")
+
+##############################################################################
+
+
+>>>>>>> d0549b5ac4f0f53fb519627ab7c0cd8fff976ce5
 ## Figure 5A | Summary of the pathology
 
 Summary of the pathology | with the pathology index
@@ -330,7 +376,8 @@ pat <- heatmaply(normalize(nor[,1:6]),
           dendogram = "both",
           show_dendrogram = c(T, F),
           label_names = c("Id", "Feature", "Value"),
-          row_side_palette = c("Early" = "#80CDC1", "Late" = "#DFC27D", 
+          row_side_palette = c("Early" = "#80CDC1", 
+                               "Late" = "#DFC27D", 
                                "1" = "#FFE2E2",
                                "2" = "#FFD2D2",
                                "3" = "#FFBABA",
