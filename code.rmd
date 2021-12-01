@@ -15,7 +15,7 @@ General variables
 
 Load packages
 ```{r}
-library(readxl) # read .xlsx files
+library(readxl) 
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
@@ -28,7 +28,7 @@ library(ggpubr)
 library(RColorBrewer)
 library(ggthemes)
 library(ggstatsplot)
-library(svglite) # to save as svg
+library(svglite)
 ```
 
 Load data
@@ -359,7 +359,6 @@ pat
 browseURL("./plots/5A_pathology_index.html")
 
 # save as svg
-??heatmaply
 ```
 
 ## Figure 5B | Pathology index at 2TP
