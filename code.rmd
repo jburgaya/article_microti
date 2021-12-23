@@ -19,7 +19,6 @@ library(readxl)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
-library(hrbrthemes)
 library(viridisLite)
 library(viridis)
 library(plotly)
@@ -27,7 +26,6 @@ library(heatmaply)
 library(ggpubr)
 library(RColorBrewer)
 library(ggthemes)
-library(ggstatsplot)
 library(svglite)
 ```
 
@@ -196,7 +194,7 @@ gran <- liver |>
   ggplot(aes(x=TP, y=area, fill=TP)) +
   geom_violin(show.legend = FALSE, draw_quantiles = 0.5) +
   scale_x_discrete(labels = c("Early" = "Early\nn=94", "Late" = "Late\nn=152"))+
-  scale_y_continuous(expand = c(0,0), limits = c(0, 80000)) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 80000), labels = scales::comma) +
   scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +
   geom_jitter(show.legend = FALSE, width = 0.15, height = 0.10, shape = 19, color = "grey30", size = 1.5) +
   annotate("text", x = "Early", y = 78000, label = "italic(p) == 0.96", parse = T, size = 7) +
@@ -279,8 +277,8 @@ liver |>
   theme_classic(base_size = 15)
 
 # save
-dev.copy(png, file="./plots/liver_index.png", width=, height=)
-dev.off()
+# dev.copy(png, file="./plots/liver_index.png", width=, height=)
+# dev.off()
 ```
 
 
@@ -347,18 +345,17 @@ pat <- heatmaply(normalize(nor[,1:6]),
           #grid_size = 0.00000001,
           margins = c(60, 100, 40, 20),
           heatmap_layers = theme(axis.line = element_blank()),
-          fontsize_row = 30,
-          fontsize_col = 30,
+          fontsize_row = 25,
+          fontsize_col = 25,
           file = "./plots/5A_pathology_index.html",
           colorbar_xpos = 1.025,
           colorbar_ypos = 0.6,
           key.title = "Score")
-pat
+pat |>
+  config(toImageButtonOptions = list(format = "svg"))
 
 # open plot
 browseURL("./plots/5A_pathology_index.html")
-
-# save as svg
 ```
 
 ## Figure 5B | Pathology index at 2TP
@@ -383,7 +380,7 @@ patindex_tp
 patindex
 
 # viz
-patindex_tp |>
+gran <- patindex_tp |>
   ggplot(aes(x=TP, y=Index, fill=TP)) +
   geom_boxplot(show.legend = FALSE) +
   scale_fill_manual(values = c("#80CDC1", "#DFC27D")) +
@@ -397,6 +394,7 @@ patindex_tp |>
   ylab("Pathology index") +
   theme(plot.title = element_text(size = 11)) +
   theme_classic(base_size = 25)
+gran
 
 # save as svg
 ggsave(file="./plots/5B_pathology_index.svg", plot=gran, width=10, height=8)
