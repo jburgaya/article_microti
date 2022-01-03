@@ -27,7 +27,27 @@ library(ggpubr)
 library(RColorBrewer)
 library(ggthemes)
 library(svglite)
+library(htmlwidgets)
 ```
+
+Update heatmaply
+```{r}
+# good packages to install for this to work smoothly:
+
+install.packages(c("Rcpp","ggplot2","munsell","htmltools","DBI","assertthat",
+"gridExtra","digest","fpc","TSP","registry","gclus","gplots","RColorBrewer",
+"stringr","labeling","yaml"))
+
+# You'll need devtools
+install.packages.2 <- function (pkg) if (!require(pkg)) install.packages(pkg);
+install.packages.2('devtools')
+# make sure you have Rtools installed first! if not, then run:
+#install.packages('installr'); install.Rtools()
+
+devtools::install_github("ropensci/plotly") # you will probably benefit from the latest version of plotly
+devtools::install_github('talgalili/heatmaply')
+```
+
 
 Load data
 ```{r}
@@ -328,7 +348,8 @@ pat <- heatmaply(normalize(nor[,1:6]),
           dendogram = "both",
           show_dendrogram = c(T, F),
           label_names = c("Id", "Feature", "Value"),
-          row_side_palette = c("Early" = "#80CDC1", "Late" = "#DFC27D", 
+          row_side_palette = factor(c("Early" = "#80CDC1", 
+                               "Late" = "#DFC27D", 
                                "1" = "#FFE2E2",
                                "2" = "#FFD2D2",
                                "3" = "#FFBABA",
@@ -338,25 +359,29 @@ pat <- heatmaply(normalize(nor[,1:6]),
                                "7" = "#FF5A5A",
                                "8" = "#FF4444",
                                "9" = "#FF2525",
-                               "10" = "#D80000"),
-          row_side_colors = data.frame(nor[,7:8]),
+                               "10" = "#D80000")),
+          row_side_colors = data.frame(nor[,7:8]), levels = c("Early", "Late", 
+                                                              "1", "2", "3", "4", 
+                                                              "5", "6", "7", "8", 
+                                                              "9", "10"),
           side_color_colorbar_len = 0.5,
           grid_color = NA,
-          #grid_size = 0.00000001,
           margins = c(60, 100, 40, 20),
           heatmap_layers = theme(axis.line = element_blank()),
-          fontsize_row = 25,
-          fontsize_col = 25,
-          file = "./plots/5A_pathology_index.html",
+          fontsize_row = 30,
+          fontsize_col = 30,
           colorbar_xpos = 1.025,
           colorbar_ypos = 0.6,
-          key.title = "Score")
-pat |>
-  config(toImageButtonOptions = list(format = "svg"))
+          contours = list(start = 0, end = 1, size = 2),
+          key.title = "Score") |>
+          colorbar(tickfont = list(size = 20), titlefont = list(size = 30), which = 1) |>
+          colorbar(tickfont = list(size = 20), titlefont = list(size = 30), which = 2) |>
+  saveWidget(file = "./plots/5A_pathology_index.html")
 
 # open plot
 browseURL("./plots/5A_pathology_index.html")
 ```
+
 
 ## Figure 5B | Pathology index at 2TP
 
