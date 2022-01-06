@@ -3,6 +3,7 @@
 ---
 title: "article_microti code"
 author: "JB"
+output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
