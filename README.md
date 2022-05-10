@@ -1,6 +1,6 @@
 # Mycobacterium microti infection in bank voles 2021
 
-R Markdown document to reproduce the data anlaysis on the development and progression of the _Mycobacterium microti_ infection in a bank vole (_Myodes glareolus_) animal model. <ref>
+R Markdown document to reproduce the data anlaysis on the development and progression of the _Mycobacterium microti_ infection in a bank vole (_Myodes glareolus_) animal model. <https://doi.org/10.3390/microorganisms10010135>
 
 ## Summary
 
